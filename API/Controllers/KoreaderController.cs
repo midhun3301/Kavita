@@ -19,8 +19,7 @@ namespace API.Controllers;
 /// The endpoint to interface with Koreader's Progress Sync plugin.
 /// </summary>
 /// <remarks>
-/// Koreader uses a different form of athentication. It stores the user name
-/// and password in headers.
+/// Koreader uses a different form of authentication. It stores the username and password in headers.
 /// </remarks>
 /// <see cref="https://github.com/koreader/koreader/blob/master/plugins/kosync.koplugin/KOSyncClient.lua"/>
 [AllowAnonymous]
@@ -55,6 +54,7 @@ public class KoreaderController : BaseApiController
     {
         var userId = await GetUserId(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null) return Unauthorized();
 
         return Ok(new { username = user.UserName });
     }
@@ -66,12 +66,12 @@ public class KoreaderController : BaseApiController
         _logger.LogDebug("Koreader sync progress: {Progress}", request.Progress);
         var userId = await GetUserId(apiKey);
         await _koreaderService.SaveProgress(request, userId);
-        
+
         return Ok(new { document = request.Document, timestamp = DateTime.UtcNow });
     }
 
     [HttpGet("{apiKey}/syncs/progress/{ebookHash}")]
-    public async Task<IActionResult> GetProgress(string apiKey, string ebookHash)
+    public async Task<ActionResult<KoreaderBookDto>> GetProgress(string apiKey, string ebookHash)
     {
         var userId = await GetUserId(apiKey);
         var response = await _koreaderService.GetProgress(ebookHash, userId);
