@@ -21,7 +21,7 @@ public class KoreaderHelperTests
         expected.PageNum = page;
         var actual = EmptyProgressDto();
 
-        KoreaderHelper.UpdateProgressDto(koreaderPosition, actual);
+        KoreaderHelper.UpdateProgressDto(actual, koreaderPosition);
         Assert.Equal(expected.BookScrollId, actual.BookScrollId);
         Assert.Equal(expected.PageNum, actual.PageNum);
     }

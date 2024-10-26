@@ -1,7 +1,9 @@
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Koreader;
+using API.DTOs.Progress;
 using API.Helpers;
+using API.Helpers.Builders;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -16,45 +18,65 @@ public interface IKoreaderService
 
 public class KoreaderService : IKoreaderService
 {
-    private IReaderService _readerService;
-    private IUnitOfWork _unitOfWork;
-    private ILogger<KoreaderService> _logger;
+    private readonly IReaderService _readerService;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<KoreaderService> _logger;
 
-    public KoreaderService(IReaderService readerService, IUnitOfWork unitOfWork,
-        ILogger<KoreaderService> logger)
+    public KoreaderService(IReaderService readerService, IUnitOfWork unitOfWork, ILogger<KoreaderService> logger)
     {
         _readerService = readerService;
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
+    /// <summary>
+    /// Given a Koreader hash, locate the underlying file and generate/update a progress event.
+    /// </summary>
+    /// <param name="koreaderBookDto"></param>
+    /// <param name="userId"></param>
     public async Task SaveProgress(KoreaderBookDto koreaderBookDto, int userId)
     {
+        _logger.LogDebug("Saving Koreader progress for {UserId}: {KoreaderProgress}", userId, koreaderBookDto.Progress);
         var file = await _unitOfWork.MangaFileRepository.GetByKoreaderHash(koreaderBookDto.Document);
+        if (file == null) return;
+
         var userProgressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
+        if (userProgressDto == null)
+        {
+            // TODO: Handle this case
+            userProgressDto = new ProgressDto()
+            {
+                ChapterId = file.ChapterId,
+            };
+        }
+        // Update the bookScrollId if possible
+        KoreaderHelper.UpdateProgressDto(userProgressDto, koreaderBookDto.Progress);
 
-        _logger.LogInformation("Saving Koreader progress to Kavita: {KoreaderProgress}", koreaderBookDto.Progress);
-        KoreaderHelper.UpdateProgressDto(koreaderBookDto.Progress, userProgressDto);
         await _readerService.SaveReadingProgress(userProgressDto, userId);
-
-        await _unitOfWork.CommitAsync();
     }
 
+    /// <summary>
+    /// Returns a Koreader Dto representing current book and the progress within
+    /// </summary>
+    /// <param name="bookHash"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<KoreaderBookDto> GetProgress(string bookHash, int userId)
     {
-        var file = await _unitOfWork.MangaFileRepository.GetByKoreaderHash(bookHash);
-        var progressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
-        _logger.LogInformation("Transmitting Kavita progress to Koreader: {KoreaderProgress}", progressDto.BookScrollId);
-        var koreaderProgress = KoreaderHelper.GetKoreaderPosition(progressDto);
         var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var builder = new KoreaderBookDtoBuilder(bookHash);
 
-        return new KoreaderBookDto
-        {
-            Document = bookHash,
-            Device_id = settingsDto.InstallId,
-            Device = "Kavita",
-            Progress = koreaderProgress,
-            Percentage = progressDto.PageNum / (float) file.Pages
-        };
+        var file = await _unitOfWork.MangaFileRepository.GetByKoreaderHash(bookHash);
+
+        // TODO: How do we handle when file isn't found by hash?
+        if (file == null) return builder.Build();
+
+        var progressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
+        var koreaderProgress = KoreaderHelper.GetKoreaderPosition(progressDto);
+
+        return builder.WithProgress(koreaderProgress)
+            .WithPercentage(progressDto?.PageNum, file.Pages)
+            .WithDeviceId(settingsDto.InstallId, userId) // TODO: Should we generate a hash for UserId + InstallId so that this DeviceId is unique to the user on the server?
+            .Build();
     }
 }

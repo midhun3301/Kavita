@@ -66,7 +66,7 @@ public static class KoreaderHelper
         return BitConverter.ToString(bytes).Replace("-", string.Empty);
     }
 
-    public static void UpdateProgressDto(string koreaderPosition, ProgressDto progress)
+    public static void UpdateProgressDto(ProgressDto progress, string koreaderPosition)
     {
         var path = koreaderPosition.Split('/');
         if (path.Length < 6)
@@ -94,6 +94,7 @@ public static class KoreaderHelper
     {
         string lastTag;
         var koreaderPageNumber = progressDto.PageNum + 1;
+
         if (string.IsNullOrEmpty(progressDto.BookScrollId))
         {
             lastTag = "a";
@@ -103,6 +104,7 @@ public static class KoreaderHelper
             var tokens = progressDto.BookScrollId.Split('/');
             lastTag = tokens[^1].ToLower();
         }
+
         // The format that Koreader accepts as a progress string. It tells Koreader where Kavita last left off.
         return $"/body/DocFragment[{koreaderPageNumber}]/body/div/{lastTag}";
     }

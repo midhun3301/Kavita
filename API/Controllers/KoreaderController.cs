@@ -13,15 +13,15 @@ using Microsoft.Extensions.Logging;
 using static System.Net.WebRequestMethods;
 
 namespace API.Controllers;
-
 #nullable enable
+
 /// <summary>
 /// The endpoint to interface with Koreader's Progress Sync plugin.
 /// </summary>
 /// <remarks>
 /// Koreader uses a different form of authentication. It stores the username and password in headers.
+/// https://github.com/koreader/koreader/blob/master/plugins/kosync.koplugin/KOSyncClient.lua
 /// </remarks>
-/// <see cref="https://github.com/koreader/koreader/blob/master/plugins/kosync.koplugin/KOSyncClient.lua"/>
 [AllowAnonymous]
 public class KoreaderController : BaseApiController
 {
@@ -59,16 +59,21 @@ public class KoreaderController : BaseApiController
         return Ok(new { username = user.UserName });
     }
 
-
+    /// <summary>
+    /// Syncs book progress with Kavita. Will attempt to save the underlying reader position if possible.
+    /// </summary>
+    /// <param name="apiKey"></param>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpPut("{apiKey}/syncs/progress")]
-    public async Task<IActionResult> UpdateProgress(string apiKey, KoreaderBookDto request)
+    public async Task<ActionResult<KoreaderProgressUpdateDto>> UpdateProgress(string apiKey, KoreaderBookDto request)
     {
-        _logger.LogDebug("Koreader sync progress: {Progress}", request.Progress);
         var userId = await GetUserId(apiKey);
         await _koreaderService.SaveProgress(request, userId);
 
-        return Ok(new { document = request.Document, timestamp = DateTime.UtcNow });
+        return Ok(new KoreaderProgressUpdateDto{ Document = request.Document, Timestamp = DateTime.UtcNow });
     }
+
 
     [HttpGet("{apiKey}/syncs/progress/{ebookHash}")]
     public async Task<ActionResult<KoreaderBookDto>> GetProgress(string apiKey, string ebookHash)
@@ -80,11 +85,6 @@ public class KoreaderController : BaseApiController
         return Ok(response);
     }
 
-
-    /// <summary>
-    /// Gets the user from the API key
-    /// </summary>
-    /// <returns>The user's Id</returns>
     private async Task<int> GetUserId(string apiKey)
     {
         try
