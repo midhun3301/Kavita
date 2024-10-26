@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using API.Entities;
 using API.Entities.Enums;
@@ -61,12 +61,15 @@ public class MangaFileBuilder : IEntityBuilder<MangaFile>
         return this;
     }
 
+    /// <summary>
+    /// Generate the Hash on the underlying file
+    /// </summary>
+    /// <remarks>Only applicable to Epubs</remarks>
     public MangaFileBuilder WithHash()
     {
-        if (_mangaFile.Format == MangaFormat.Epub)
-        {
-            _mangaFile.KoreaderHash = KoreaderHelper.HashContents(_mangaFile.FilePath);
-        }
+        if (_mangaFile.Format != MangaFormat.Epub) return this;
+
+        _mangaFile.KoreaderHash = KoreaderHelper.HashContents(_mangaFile.FilePath);
 
         return this;
     }

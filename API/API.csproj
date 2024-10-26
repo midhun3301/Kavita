@@ -16,9 +16,7 @@
     <Delete Files="../openapi.json" />
     <Exec Command="swagger tofile &#45;&#45;output ../openapi.json bin/$(Configuration)/$(TargetFramework)/$(AssemblyName).dll v1" />
   </Target>
-
-=======
->>>>>>> fc7f84f2bffadf9a0127d35fa01166c847b20dc0
+  
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugSymbols>false</DebugSymbols>
     <ApplicationIcon>../favicon.ico</ApplicationIcon>

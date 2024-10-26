@@ -1,12 +1,8 @@
-using API.DTOs.Koreader;
 using API.DTOs.Progress;
-using API.Services;
 using System;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace API.Helpers;
 
@@ -21,17 +17,17 @@ public static class KoreaderHelper
     /// <param name="filePath">The path to the file to hash</param>
     public static string HashContents(string filePath)
     {
-        if (string.IsNullOrEmpty(filePath))
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
         {
             return null;
         }
 
         using var file = File.OpenRead(filePath);
 
-        var step = 1024;
-        var size = 1024;
-        MD5 md5 = MD5.Create();
-        byte[] buffer = new byte[size];
+        const int step = 1024;
+        const int size = 1024;
+        var md5 = MD5.Create();
+        var buffer = new byte[size];
 
         for (var i = -1; i < 10; i++)
         {
@@ -48,15 +44,14 @@ public static class KoreaderHelper
         }
 
         file.Close();
-        md5.TransformFinalBlock(new byte[0], 0, 0);
+        md5.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
 
-        return BitConverter.ToString(md5.Hash).Replace("-", string.Empty).ToUpper();
-
+        return md5.Hash == null ? null : BitConverter.ToString(md5.Hash).Replace("-", string.Empty).ToUpper();
     }
 
     /// <summary>
-    /// Koreader can identitfy documents based on contents or title.
-    /// For now we only support by contents.
+    /// Koreader can identify documents based on contents or title.
+    /// For now, we only support by contents.
     /// </summary>
     public static string HashTitle(string filePath)
     {
@@ -74,16 +69,18 @@ public static class KoreaderHelper
         {
             return;
         }
+
         var docNumber = path[2].Replace("DocFragment[", string.Empty).Replace("]", string.Empty);
-        progress.PageNum = Int32.Parse(docNumber) - 1;
+        progress.PageNum = int.Parse(docNumber) - 1;
         var lastTag = path[5].ToUpper();
+
         if (lastTag == "A")
         {
             progress.BookScrollId = null;
         }
         else
         {
-            // The format that Kavita accpets as a progress string. It tells Kavita where Koreader last left off.
+            // The format that Kavita accepts as a progress string. It tells Kavita where Koreader last left off.
             progress.BookScrollId = $"//html[1]/BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]/{lastTag}";
         }
     }
@@ -99,7 +96,8 @@ public static class KoreaderHelper
         }
         else
         {
-            lastTag = progressDto.BookScrollId.Split('/').Last().ToLower();
+            var tokens = progressDto.BookScrollId.Split('/');
+            lastTag = tokens[^1].ToLower();
         }
         // The format that Koreader accepts as a progress string. It tells Koreader where Kavita last left off.
         return $"/body/DocFragment[{koreaderPageNumber}]/body/div/{lastTag}";

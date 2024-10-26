@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.3.2",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.3.18",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
@@ -2758,6 +2758,67 @@
         }
       }
     },
+    "/api/Image/person-cover": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "summary": "Returns cover image for Person",
+        "parameters": [
+          {
+            "name": "personId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Image/person-cover-by-name": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "summary": "Returns cover image for Person",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Image/cover-upload": {
       "get": {
         "tags": [
@@ -2776,6 +2837,99 @@
           {
             "name": "apiKey",
             "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Koreader/{apiKey}/users/auth": {
+      "get": {
+        "tags": [
+          "Koreader"
+        ],
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Koreader/{apiKey}/syncs/progress": {
+      "put": {
+        "tags": [
+          "Koreader"
+        ],
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KoreaderBookDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KoreaderBookDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/KoreaderBookDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Koreader/{apiKey}/syncs/progress/{ebookHash}": {
+      "get": {
+        "tags": [
+          "Koreader"
+        ],
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ebookHash",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -5129,6 +5283,371 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProgressDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Person": {
+      "get": {
+        "tags": [
+          "Person"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Person/roles": {
+      "get": {
+        "tags": [
+          "Person"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      1,
+                      3,
+                      4,
+                      5,
+                      6,
+                      7,
+                      8,
+                      9,
+                      10,
+                      11,
+                      12,
+                      13,
+                      14,
+                      15
+                    ],
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      1,
+                      3,
+                      4,
+                      5,
+                      6,
+                      7,
+                      8,
+                      9,
+                      10,
+                      11,
+                      12,
+                      13,
+                      14,
+                      15
+                    ],
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      1,
+                      3,
+                      4,
+                      5,
+                      6,
+                      7,
+                      8,
+                      9,
+                      10,
+                      11,
+                      12,
+                      13,
+                      14,
+                      15
+                    ],
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Person/all": {
+      "post": {
+        "tags": [
+          "Person"
+        ],
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrowsePersonDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrowsePersonDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrowsePersonDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Person/update": {
+      "post": {
+        "tags": [
+          "Person"
+        ],
+        "summary": "Updates the Person",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePersonDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePersonDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePersonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Person/series-known-for": {
+      "get": {
+        "tags": [
+          "Person"
+        ],
+        "summary": "Returns the top 20 series that the \"person\" is known for. This will use Average Rating when applicable (Kavita+ field), else it's a random sort",
+        "parameters": [
+          {
+            "name": "personId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Person/chapters-by-role": {
+      "get": {
+        "tags": [
+          "Person"
+        ],
+        "parameters": [
+          {
+            "name": "personId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "schema": {
+              "enum": [
+                1,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StandaloneChapterDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StandaloneChapterDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StandaloneChapterDto"
+                  }
                 }
               }
             }
@@ -10274,6 +10793,19 @@
         }
       }
     },
+    "/api/Server/cleanup": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Performs the nightly maintenance work on the Server. Can be heavy.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Server/backup-db": {
       "post": {
         "tags": [
@@ -12634,7 +13166,6 @@
         ],
         "summary": "Uploads a new theme file",
         "requestBody": {
-          "description": "",
           "content": {
             "multipart/form-data": {
               "schema": {
@@ -12642,6 +13173,7 @@
                 "properties": {
                   "formFile": {
                     "type": "string",
+                    "description": "",
                     "format": "binary"
                   }
                 }
@@ -12960,6 +13492,39 @@
           }
         },
         "deprecated": true
+      }
+    },
+    "/api/Upload/person": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Replaces person tag cover image and locks it with a base64 encoded image",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFileDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFileDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/api/Users/delete-user": {
@@ -14730,7 +15295,8 @@
               5,
               6,
               7,
-              8
+              8,
+              9
             ],
             "type": "integer",
             "description": "For system provided",
@@ -15102,6 +15668,73 @@
         },
         "additionalProperties": false
       },
+      "BrowsePersonDto": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverImageLocked": {
+            "type": "boolean"
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverImage": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "asin": {
+            "type": "string",
+            "description": "ASIN for person",
+            "nullable": true
+          },
+          "aniListId": {
+            "type": "integer",
+            "description": "https://anilist.co/staff/{AniListId}/",
+            "format": "int32"
+          },
+          "malId": {
+            "type": "integer",
+            "description": "https://myanimelist.net/people/{MalId}/\r\nhttps://myanimelist.net/character/{MalId}/CharacterName",
+            "format": "int64"
+          },
+          "hardcoverId": {
+            "type": "string",
+            "description": "https://hardcover.app/authors/{HardcoverId}",
+            "nullable": true
+          },
+          "seriesCount": {
+            "type": "integer",
+            "description": "Number of Series this Person is the Writer for",
+            "format": "int32"
+          },
+          "issueCount": {
+            "type": "integer",
+            "description": "Number or Issues this Person is the Writer for",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Used to browse writers and click in to see their series"
+      },
       "BulkActionDto": {
         "type": "object",
         "properties": {
@@ -15420,7 +16053,7 @@
           "people": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Person"
+              "$ref": "#/components/schemas/ChapterPeople"
             },
             "description": "All people attached at a Chapter level. Usually Comics will have different people per issue.",
             "nullable": true
@@ -16134,6 +16767,49 @@
         },
         "additionalProperties": false,
         "description": "Exclusively metadata about a given chapter"
+      },
+      "ChapterPeople": {
+        "required": [
+          "role"
+        ],
+        "type": "object",
+        "properties": {
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapter": {
+            "$ref": "#/components/schemas/Chapter"
+          },
+          "personId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "person": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "role": {
+            "enum": [
+              1,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15
+            ],
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       },
       "CollectionTag": {
         "required": [
@@ -17831,6 +18507,38 @@
         "additionalProperties": false,
         "description": "Represents an individual button in a Jump Bar"
       },
+      "KoreaderBookDto": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "string",
+            "description": "This is the Koreader hash of the book. It is used to identify the book.",
+            "nullable": true
+          },
+          "device_id": {
+            "type": "string",
+            "description": "A randomly generated id from the koreader device. Only used to maintain the Koreader interface.",
+            "nullable": true
+          },
+          "device": {
+            "type": "string",
+            "description": "The Koreader device name. Only used to maintain the Koreader interface.",
+            "nullable": true
+          },
+          "percentage": {
+            "type": "number",
+            "description": "Percent progress of the book. Only used to maintain the Koreader interface.",
+            "format": "float"
+          },
+          "progress": {
+            "type": "string",
+            "description": "An XPath string read by Koreader to determine the location within the epub.\r\nEssentially, it is Koreader's equivalent to ProgressDto.BookScrollId.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "This is the interface for receiving and sending updates to Koreader. The only fields\r\nthat are actually used are the Document and Progress fields."
+      },
       "LanguageDto": {
         "required": [
           "isoCode",
@@ -18238,6 +18946,11 @@
             "description": "Absolute path to the archive file",
             "nullable": true
           },
+          "koreaderHash": {
+            "type": "string",
+            "description": "A hash of the document using Koreader's unique hashing algorithm",
+            "nullable": true
+          },
           "pages": {
             "type": "integer",
             "description": "Number of pages for the given file",
@@ -18555,8 +19268,7 @@
       "Person": {
         "required": [
           "name",
-          "normalizedName",
-          "role"
+          "normalizedName"
         ],
         "type": "object",
         "properties": {
@@ -18572,37 +19284,57 @@
             "type": "string",
             "nullable": true
           },
-          "role": {
-            "enum": [
-              1,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              15
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "seriesMetadatas": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SeriesMetadata"
-            },
+          "coverImage": {
+            "type": "string",
             "nullable": true
           },
-          "chapterMetadatas": {
+          "coverImageLocked": {
+            "type": "boolean"
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "asin": {
+            "type": "string",
+            "description": "ASIN for person",
+            "nullable": true
+          },
+          "aniListId": {
+            "type": "integer",
+            "description": "https://anilist.co/staff/{AniListId}/",
+            "format": "int32"
+          },
+          "malId": {
+            "type": "integer",
+            "description": "https://myanimelist.net/people/{MalId}/\r\nhttps://myanimelist.net/character/{MalId}/CharacterName",
+            "format": "int64"
+          },
+          "hardcoverId": {
+            "type": "string",
+            "description": "https://hardcover.app/authors/{HardcoverId}",
+            "nullable": true
+          },
+          "chapterPeople": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Chapter"
+              "$ref": "#/components/schemas/ChapterPeople"
+            },
+            "description": "https://metron.cloud/creator/{slug}/",
+            "nullable": true
+          },
+          "seriesMetadataPeople": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesMetadataPeople"
             },
             "nullable": true
           }
@@ -18623,25 +19355,44 @@
             "type": "string",
             "nullable": true
           },
-          "role": {
-            "enum": [
-              1,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              15
-            ],
+          "coverImageLocked": {
+            "type": "boolean"
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverImage": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "asin": {
+            "type": "string",
+            "description": "ASIN for person",
+            "nullable": true
+          },
+          "aniListId": {
             "type": "integer",
+            "description": "https://anilist.co/staff/{AniListId}/",
             "format": "int32"
+          },
+          "malId": {
+            "type": "integer",
+            "description": "https://myanimelist.net/people/{MalId}/\r\nhttps://myanimelist.net/character/{MalId}/CharacterName",
+            "format": "int64"
+          },
+          "hardcoverId": {
+            "type": "string",
+            "description": "https://hardcover.app/authors/{HardcoverId}",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -20285,36 +21036,6 @@
             "type": "string",
             "nullable": true
           },
-          "collectionTags": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CollectionTag"
-            },
-            "nullable": true,
-            "deprecated": true
-          },
-          "genres": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Genre"
-            },
-            "nullable": true
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Tag"
-            },
-            "nullable": true
-          },
-          "people": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Person"
-            },
-            "description": "All people attached at a Series level.",
-            "nullable": true
-          },
           "ageRating": {
             "enum": [
               0,
@@ -20436,12 +21157,42 @@
           "releaseYearLocked": {
             "type": "boolean"
           },
-          "series": {
-            "$ref": "#/components/schemas/Series"
+          "collectionTags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CollectionTag"
+            },
+            "nullable": true,
+            "deprecated": true
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Genre"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "nullable": true
+          },
+          "people": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesMetadataPeople"
+            },
+            "description": "All people attached at a Series level.",
+            "nullable": true
           },
           "seriesId": {
             "type": "integer",
             "format": "int32"
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
           },
           "rowVersion": {
             "type": "integer",
@@ -20692,6 +21443,49 @@
             "type": "boolean"
           },
           "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeriesMetadataPeople": {
+        "required": [
+          "role"
+        ],
+        "type": "object",
+        "properties": {
+          "seriesMetadataId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesMetadata": {
+            "$ref": "#/components/schemas/SeriesMetadata"
+          },
+          "personId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "person": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "role": {
+            "enum": [
+              1,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15
+            ],
             "type": "integer",
             "format": "int32"
           }
@@ -21233,7 +22027,8 @@
               5,
               6,
               7,
-              8
+              8,
+              9
             ],
             "type": "integer",
             "description": "For system provided",
@@ -21514,6 +22309,397 @@
         },
         "additionalProperties": false,
         "description": "Sorting Options for a query"
+      },
+      "StandaloneChapterDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "range": {
+            "type": "string",
+            "description": "Range of chapters. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\". If special, will be special name.",
+            "nullable": true
+          },
+          "number": {
+            "type": "string",
+            "description": "Smallest number of the Range.",
+            "nullable": true,
+            "deprecated": true
+          },
+          "minNumber": {
+            "type": "number",
+            "description": "This may be 0 under the circumstance that the Issue is \"Alpha\" or other non-standard numbers.",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
+            "format": "float"
+          },
+          "pages": {
+            "type": "integer",
+            "description": "Total number of pages in all MangaFiles",
+            "format": "int32"
+          },
+          "isSpecial": {
+            "type": "boolean",
+            "description": "If this Chapter contains files that could only be identified as Series or has Special Identifier from filename"
+          },
+          "title": {
+            "type": "string",
+            "description": "Used for books/specials to display custom title. For non-specials/books, will be set to API.DTOs.ChapterDto.Range",
+            "nullable": true
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MangaFileDto"
+            },
+            "description": "The files that represent this Chapter",
+            "nullable": true
+          },
+          "pagesRead": {
+            "type": "integer",
+            "description": "Calculated at API time. Number of pages read for this Chapter for logged in user.",
+            "format": "int32"
+          },
+          "lastReadingProgressUtc": {
+            "type": "string",
+            "description": "The last time a chapter was read by current authenticated user",
+            "format": "date-time"
+          },
+          "lastReadingProgress": {
+            "type": "string",
+            "description": "The last time a chapter was read by current authenticated user",
+            "format": "date-time"
+          },
+          "coverImageLocked": {
+            "type": "boolean",
+            "description": "If the Cover Image is locked for this entity"
+          },
+          "volumeId": {
+            "type": "integer",
+            "description": "Volume Id this Chapter belongs to",
+            "format": "int32"
+          },
+          "createdUtc": {
+            "type": "string",
+            "description": "When chapter was created",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created": {
+            "type": "string",
+            "description": "When chapter was created in local server time",
+            "format": "date-time"
+          },
+          "releaseDate": {
+            "type": "string",
+            "description": "When the chapter was released.",
+            "format": "date-time"
+          },
+          "titleName": {
+            "type": "string",
+            "description": "Title of the Chapter/Issue",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "description": "Summary of the Chapter",
+            "nullable": true
+          },
+          "ageRating": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Age Rating for the issue/chapter",
+            "format": "int32"
+          },
+          "wordCount": {
+            "type": "integer",
+            "description": "Total words in a Chapter (books only)",
+            "format": "int64"
+          },
+          "minHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avgHoursToRead": {
+            "type": "number",
+            "format": "float"
+          },
+          "webLinks": {
+            "type": "string",
+            "description": "Comma-separated link of urls to external services that have some relation to the Chapter",
+            "nullable": true
+          },
+          "isbn": {
+            "type": "string",
+            "description": "ISBN-13 (usually) of the Chapter",
+            "nullable": true
+          },
+          "writers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "coverArtists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "characters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "pencillers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "inkers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "imprints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "colorists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "letterers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "editors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "translators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GenreTagDto"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagDto"
+            },
+            "description": "Collection of all Tags from underlying chapters for a Series",
+            "nullable": true
+          },
+          "publicationStatus": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language for the Chapter/Issue",
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number in the TotalCount of issues",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of issues for the series",
+            "format": "int32"
+          },
+          "languageLocked": {
+            "type": "boolean"
+          },
+          "summaryLocked": {
+            "type": "boolean"
+          },
+          "ageRatingLocked": {
+            "type": "boolean",
+            "description": "Locked by user so metadata updates from scan loop will not override AgeRating"
+          },
+          "publicationStatusLocked": {
+            "type": "boolean",
+            "description": "Locked by user so metadata updates from scan loop will not override PublicationStatus"
+          },
+          "genresLocked": {
+            "type": "boolean"
+          },
+          "tagsLocked": {
+            "type": "boolean"
+          },
+          "writerLocked": {
+            "type": "boolean"
+          },
+          "characterLocked": {
+            "type": "boolean"
+          },
+          "coloristLocked": {
+            "type": "boolean"
+          },
+          "editorLocked": {
+            "type": "boolean"
+          },
+          "inkerLocked": {
+            "type": "boolean"
+          },
+          "imprintLocked": {
+            "type": "boolean"
+          },
+          "lettererLocked": {
+            "type": "boolean"
+          },
+          "pencillerLocked": {
+            "type": "boolean"
+          },
+          "publisherLocked": {
+            "type": "boolean"
+          },
+          "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
+            "type": "boolean"
+          },
+          "coverArtistLocked": {
+            "type": "boolean"
+          },
+          "releaseYearLocked": {
+            "type": "boolean"
+          },
+          "coverImage": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryType": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "volumeTitle": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Used on Person Profile page"
       },
       "Tag": {
         "required": [
@@ -22142,6 +23328,45 @@
         },
         "additionalProperties": false,
         "description": "Update Notification denoting a new release available for user to update to"
+      },
+      "UpdatePersonDto": {
+        "required": [
+          "coverImageLocked",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "coverImageLocked": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "hardcoverId": {
+            "type": "string",
+            "nullable": true
+          },
+          "asin": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "UpdateReadingListByChapterDto": {
         "type": "object",
@@ -23282,6 +24507,10 @@
     {
       "name": "Image",
       "description": "Responsible for servicing up images stored in Kavita for entities"
+    },
+    {
+      "name": "Koreader",
+      "description": "The endpoint to interface with Koreader's Progress Sync plugin."
     },
     {
       "name": "Panels",
