@@ -6,6 +6,10 @@ using System.Text;
 
 namespace API.Helpers;
 
+/// <summary>
+/// All things related to Koreader
+/// </summary>
+/// <remarks>Original developer: https://github.com/MFDeAngelo</remarks>
 public static class KoreaderHelper
 {
     /// <summary>
