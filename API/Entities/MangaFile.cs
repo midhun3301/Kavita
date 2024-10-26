@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using System.IO;
 using API.Entities.Enums;
@@ -20,6 +20,11 @@ public class MangaFile : IEntityDate
     /// Absolute path to the archive file
     /// </summary>
     public required string FilePath { get; set; }
+    /// <summary>
+    /// A hash of the document using Koreader's unique hashing algorithm
+    /// <remark> KoreaderHash is only available for epub types </remark>
+    /// </summary>
+    public string? KoreaderHash { get; set; }
     /// <summary>
     /// Number of pages for the given file
     /// </summary>
