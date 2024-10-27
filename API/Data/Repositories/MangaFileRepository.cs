@@ -39,7 +39,6 @@ public class MangaFileRepository : IMangaFileRepository
         if (string.IsNullOrEmpty(hash)) return null;
 
         return await _context.MangaFile
-            .FirstOrDefaultAsync(f => !string.IsNullOrEmpty(f.KoreaderHash)
-                                      && f.KoreaderHash.Equals(hash, System.StringComparison.CurrentCultureIgnoreCase));
+            .FirstOrDefaultAsync(f => f.KoreaderHash != null && f.KoreaderHash.Equals(hash, System.StringComparison.CurrentCultureIgnoreCase));
     }
 }
