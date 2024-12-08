@@ -18,6 +18,7 @@
     "age-restriction-update": "There was an error updating the age restriction",
     "no-user": "User does not exist",
     "username-taken": "Username already taken",
+    "email-taken": "Email already in use",
     "user-already-confirmed": "User is already confirmed",
     "generic-user-update": "There was an exception when updating the user",
     "manual-setup-fail": "Manual setup is unable to be completed. Please cancel and recreate the invite",
