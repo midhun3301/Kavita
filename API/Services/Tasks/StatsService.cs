@@ -264,13 +264,13 @@ public class StatsService : IStatsService
         dto.MaxSeriesInALibrary = await MaxSeriesInAnyLibrary();
         dto.MaxVolumesInASeries = await MaxVolumesInASeries();
         dto.MaxChaptersInASeries = await MaxChaptersInASeries();
-        dto.TotalFiles = await _unitOfWork.LibraryRepository.GetTotalFiles();
-        dto.TotalGenres = await _unitOfWork.GenreRepository.GetCountAsync();
-        dto.TotalPeople = await _unitOfWork.PersonRepository.GetCountAsync();
-        dto.TotalSeries = await _unitOfWork.SeriesRepository.GetCountAsync();
-        dto.TotalLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).Count();
-        dto.NumberOfCollections = (await _unitOfWork.CollectionTagRepository.GetAllCollectionsAsync()).Count();
-        dto.NumberOfReadingLists = await _unitOfWork.ReadingListRepository.Count();
+        dto.TotalFiles = await _context.MangaFile.CountAsync();
+        dto.TotalGenres = await _context.Genre.CountAsync();
+        dto.TotalPeople = await _context.Person.CountAsync();
+        dto.TotalSeries = await _context.Series.CountAsync();
+        dto.TotalLibraries = await _context.Library.CountAsync();
+        dto.NumberOfCollections =  await _context.AppUserCollection.CountAsync();
+        dto.NumberOfReadingLists = await _context.ReadingList.CountAsync();
 
         try
         {
