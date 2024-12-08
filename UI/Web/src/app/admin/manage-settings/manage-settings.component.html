@@ -290,7 +290,7 @@
 
       <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('onDeckUpdateDays'); as formControl) {
-          <app-setting-item [title]="t('on-deck-last-chapter-add-label')" [subtitle]="t('on-deck-last-progress-tooltip')">
+          <app-setting-item [title]="t('on-deck-last-chapter-add-label')" [subtitle]="t('on-deck-last-chapter-add-tooltip')">
             <ng-template #view>
               {{formControl.value}}
             </ng-template>
