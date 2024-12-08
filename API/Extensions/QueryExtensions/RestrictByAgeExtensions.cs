@@ -105,8 +105,10 @@ public static class RestrictByAgeExtensions
                 sm.SeriesMetadata.AgeRating <= restriction.AgeRating));
         }
 
-        return queryable.Where(c => c.SeriesMetadataPeople.All(sm =>
-            sm.SeriesMetadata.AgeRating <= restriction.AgeRating && sm.SeriesMetadata.AgeRating > AgeRating.Unknown));
+        return queryable.Where(c =>
+            c.SeriesMetadataPeople.Any(sm => sm.SeriesMetadata.AgeRating <= restriction.AgeRating && sm.SeriesMetadata.AgeRating != AgeRating.Unknown) &&
+            c.ChapterPeople.Any(cp => cp.Chapter.AgeRating <= restriction.AgeRating && cp.Chapter.AgeRating != AgeRating.Unknown)
+        );
     }
 
     public static IQueryable<ReadingList> RestrictAgainstAgeRestriction(this IQueryable<ReadingList> queryable, AgeRestriction restriction)
