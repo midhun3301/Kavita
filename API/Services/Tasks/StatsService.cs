@@ -14,6 +14,7 @@ using API.DTOs.Stats.V3;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services.Plus;
+using API.Services.Tasks.Scanner.Parser;
 using Flurl.Http;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
@@ -231,11 +232,12 @@ public class StatsService : IStatsService
     {
         // If first time flow, just return 0
         if (!await _context.Chapter.AnyAsync()) return 0;
+
         return await _context.Series
             .AsNoTracking()
             .AsSplitQuery()
             .MaxAsync(s => s.Volumes!
-                .Where(v => v.MinNumber == 0)
+                .Where(v => v.MinNumber == Parser.LooseLeafVolumeNumber)
                 .SelectMany(v => v.Chapters!)
                 .Count());
     }
@@ -314,6 +316,7 @@ public class StatsService : IStatsService
             libDto.UsingFolderWatching = library.FolderWatching;
             libDto.CreateCollectionsFromMetadata = library.ManageCollections;
             libDto.CreateReadingListsFromMetadata = library.ManageReadingLists;
+            libDto.LibraryType = library.Type;
 
             dto.Libraries.Add(libDto);
         }
