@@ -12,7 +12,7 @@
     "prod": "npm run cache-locale-prime && ng build --configuration production && npm run minify-langs && npm run cache-locale",
     "explore": "ng build --stats-json && webpack-bundle-analyzer dist/stats.json",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "npx playwright test --ui"
   },
   "private": true,
   "dependencies": {
@@ -68,6 +68,7 @@
     "@angular/build": "^18.2.10",
     "@angular/cli": "^18.2.10",
     "@angular/compiler-cli": "^18.2.9",
+    "@playwright/test": "^1.49.0",
     "@types/d3": "^7.4.3",
     "@types/file-saver": "^2.0.7",
     "@types/luxon": "^3.4.0",
