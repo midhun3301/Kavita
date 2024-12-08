@@ -59,7 +59,7 @@ import {
 } from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {Genre} from "../_models/metadata/genre";
 import {Tag} from "../_models/tag";
-import {RelatedTabComponent} from "../_single-modules/related-tab/related-tab.component";
+import {RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
 import {ReadingList} from "../_models/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";

@@ -48,7 +48,7 @@ import {FilterUtilitiesService} from "../shared/_services/filter-utilities.servi
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ReadingList} from "../_models/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
-import {RelatedTabComponent} from "../_single-modules/related-tab/related-tab.component";
+import {RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 import {
   MetadataDetailRowComponent

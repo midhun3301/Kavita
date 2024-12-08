@@ -115,7 +115,7 @@ import {DownloadButtonComponent} from "../download-button/download-button.compon
 import {hasAnyCast} from "../../../_models/common/i-has-cast";
 import {EditVolumeModalComponent} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {CoverUpdateEvent} from "../../../_models/events/cover-update-event";
-import {RelatedSeriesPair, RelatedTabComponent} from "../../../_single-modules/related-tab/related-tab.component";
+import {RelatedSeriesPair, RelatedTabComponent} from "../../../_single-module/related-tab/related-tab.component";
 import {CollectionTagService} from "../../../_services/collection-tag.service";
 import {UserCollection} from "../../../_models/collection-tag";
 import {CoverImageComponent} from "../../../_single-module/cover-image/cover-image.component";

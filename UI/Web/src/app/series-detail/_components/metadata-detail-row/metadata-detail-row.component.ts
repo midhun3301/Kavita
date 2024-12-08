@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
-import {AgeRatingImageComponent} from "../../../_single-modules/age-rating-image/age-rating-image.component";
+import {AgeRatingImageComponent} from "../../../_single-module/age-rating-image/age-rating-image.component";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
 import {ReadTimePipe} from "../../../_pipes/read-time.pipe";
@@ -17,7 +17,7 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {MangaFormat} from "../../../_models/manga-format";
 import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
-import {PublisherFlipperComponent} from "../../../_single-modules/publisher-flipper/publisher-flipper.component";
+import {PublisherFlipperComponent} from "../../../_single-module/publisher-flipper/publisher-flipper.component";
 
 @Component({
   selector: 'app-metadata-detail-row',
