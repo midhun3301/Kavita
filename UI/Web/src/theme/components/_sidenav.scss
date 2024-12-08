@@ -12,6 +12,7 @@
   border-radius: var(--side-nav-border-radius);
   transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition), border-color var(--side-nav-border-transition);
   border: var(--side-nav-border);
+  overflow: hidden;
 
   &::-webkit-scrollbar {
     visibility: hidden;
@@ -27,7 +28,7 @@
   }
   //START closed state of the sidebar
   &.closed {
-    width: 4.0625rem;
+    width: 2.825rem;
     overflow-x: hidden;
     overflow-y: hidden;
     background-color: var(--side-nav-closed-bg-color);
@@ -49,11 +50,6 @@
           opacity: 0;
         }
 
-        .side-nav-text {
-          opacity: 0;
-          display: none;
-        }
-
         .card-actions {
           opacity: 0;
           display: none;
@@ -64,7 +60,7 @@
   //END closed state of the sidebar
   //START sidebar
   .side-nav {
-    overflow-y: hidden;
+    overflow: hidden;
     height: 100%;
     scrollbar-gutter: stable;
     scrollbar-width: thin;
@@ -73,7 +69,7 @@
       position: relative;
       align-items: center;
       display: flex;
-      justify-content: space-between;
+      justify-content: start;
       width: 100%;
       height: auto;
       min-height: 2.6rem;
@@ -89,6 +85,7 @@
         &:first-of-type {
           text-align: center;
           width: 2.5rem;
+          min-width: 2.5rem;
           margin-left: 0.3rem;
         }
 
@@ -101,7 +98,7 @@
           align-items: center;
           height: 100%;
           justify-content: inherit;
-          width: 100%;
+          padding: 0 0.625rem;
 
           i {
             font-size: var(--side-nav-icon-size);
@@ -291,10 +288,6 @@
     .side-nav-item {
       width: 100%;
       padding: 0;
-      display: block;
-      line-height: 2.5rem;
-      text-align: center;
-      min-height: unset;
       color: var(--side-nav-item-closed-color);
 
       &:hover {
@@ -317,11 +310,13 @@
     margin: 0;
     left: 0;
     top: 0;
-    transition: width var(--side-nav-openclose-transition);
+    transition: width var(--side-nav-openclose-transition), visibility var(--side-nav-openclose-transition);
     z-index: 1050;
+    overflow-x: hidden;
     overflow-y: auto;
     border: var(--side-nav-mobile-border);
     border-radius: 0rem;
+    visibility: visible;
 
     &.preference {
         background-color: unset;
@@ -349,8 +344,10 @@
 
     &.closed {
       width: 0;
+      background-color: var(--side-nav-mobile-bg-color);
       overflow: hidden;
       box-shadow: none;
+      visibility: hidden;
     }
 
     .side-nav {
@@ -383,9 +380,13 @@
         left: 0;
         top: 0;
         z-index: 1041;
+        visibility: visible;
+        opacity: 1;
+        transition: visibility var(--side-nav-openclose-transition), opacity var(--side-nav-openclose-transition);
 
         &.closed {
-            display: none;
+          visibility: hidden;
+          opacity: 0;
         }
     }
 }
