@@ -39,6 +39,7 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {ThemeService} from "../_services/theme.service";
 import {DefaultModalOptions} from "../_models/default-modal-options";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-person-detail',
@@ -74,6 +75,7 @@ export class PersonDetailComponent {
   protected readonly imageService = inject(ImageService);
   protected readonly accountService = inject(AccountService);
   private readonly themeService = inject(ThemeService);
+  private readonly toastr = inject(ToastrService);
 
   protected readonly TagBadgeCursor = TagBadgeCursor;
 
@@ -104,7 +106,14 @@ export class PersonDetailComponent {
         this.personName = personName;
         return this.personService.get(personName);
       }),
-      tap(person => {
+      tap((person) => {
+
+        if (person == null) {
+          this.toastr.error(translate('toasts.unauthorized-1'));
+          this.router.navigateByUrl('/home');
+          return;
+        }
+
         this.person = person;
         this.personSubject.next(person); // emit the person data for subscribers
         this.themeService.setColorScape(person.primaryColor || '', person.secondaryColor);

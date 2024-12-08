@@ -26,7 +26,7 @@ export class PersonService {
   }
 
   get(name: string) {
-    return this.httpClient.get<Person>(this.baseUrl + `person?name=${name}`);
+    return this.httpClient.get<Person | null>(this.baseUrl + `person?name=${name}`);
   }
 
   getRolesForPerson(personId: number) {
