@@ -30,4 +30,8 @@ export class NewUpdateModalComponent {
     this.ngbModal.close();
   }
 
+  refresh() {
+    window.location.href = window.location.href;
+  }
+
 }

@@ -46,7 +46,7 @@ public interface IVersionUpdaterService
 {
     Task<UpdateNotificationDto?> CheckForUpdate();
     Task PushUpdate(UpdateNotificationDto update);
-    Task<IList<UpdateNotificationDto>> GetAllReleases();
+    Task<IList<UpdateNotificationDto>> GetAllReleases(int count = 0);
     Task<int> GetNumberOfReleasesBehind();
 }
 
@@ -84,14 +84,20 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         return CreateDto(update);
     }
 
-    public async Task<IList<UpdateNotificationDto>> GetAllReleases()
+    public async Task<IList<UpdateNotificationDto>> GetAllReleases(int count = 0)
     {
         var updates = await GetGithubReleases();
-        var updateDtos = updates.Select(CreateDto)
+        var query = updates.Select(CreateDto)
             .Where(d => d != null)
             .OrderByDescending(d => d!.PublishDate)
-            .Select(d => d!)
-            .ToList();
+            .Select(d => d!);
+
+        if (count > 0)
+        {
+            query = query.Take(count);
+        }
+
+        var updateDtos = query.ToList();
 
         // Find the latest dto
         var latestRelease = updateDtos[0]!;
