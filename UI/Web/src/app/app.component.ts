@@ -23,6 +23,7 @@ import {OutOfDateModalComponent} from "./announcements/_components/out-of-date-m
 import {PreferenceNavComponent} from "./sidenav/preference-nav/preference-nav.component";
 import {Breakpoint, UtilityService} from "./shared/_services/utility.service";
 import {TranslocoService} from "@jsverse/transloco";
+import {User} from "./_models/user";
 
 @Component({
     selector: 'app-root',
@@ -121,19 +122,7 @@ export class AppComponent implements OnInit {
     this.libraryService.getLibraryNames().pipe(take(1), shareReplay({refCount: true, bufferSize: 1})).subscribe();
 
     // Get the server version, compare vs localStorage, and if different bust locale cache
-    const versionKey = 'kavita--version';
-    this.serverService.getVersion(user.apiKey).subscribe(version => {
-      const cachedVersion = localStorage.getItem(versionKey);
-      console.log('Kavita version: ', version, ' Running version: ', cachedVersion);
-
-      if (cachedVersion == null || cachedVersion != version) {
-        // Bust locale cache
-        this.bustLocaleCache();
-        localStorage.setItem(versionKey, version);
-        location.reload();
-      }
-      localStorage.setItem(versionKey, version);
-    });
+    this.checkForUpdate(user);
 
     // Every hour, have the UI check for an update. People seriously stay out of date
     interval(2* 60 * 60 * 1000) // 2 hours in milliseconds
@@ -152,6 +141,28 @@ export class AppComponent implements OnInit {
         })
       )
       .subscribe();
+  }
+
+  /**
+   * Check if the server is running a version
+   * @param user
+   * @private
+   */
+  private checkForUpdate(user: User) {
+
+    const versionKey = 'kavita--version';
+    this.serverService.getVersion(user.apiKey).subscribe(version => {
+      const cachedVersion = localStorage.getItem(versionKey);
+      console.log('Kavita version: ', version, ' Running version: ', cachedVersion);
+
+      if (cachedVersion == null || cachedVersion != version) {
+        // Bust locale cache
+        this.bustLocaleCache();
+        localStorage.setItem(versionKey, version);
+        location.reload();
+      }
+      localStorage.setItem(versionKey, version);
+    });
   }
 
   private bustLocaleCache() {

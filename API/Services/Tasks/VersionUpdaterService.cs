@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.DTOs.Update;
 using API.SignalR;
@@ -49,7 +50,7 @@ public interface IVersionUpdaterService
     Task<int> GetNumberOfReleasesBehind();
 }
 
-public class VersionUpdaterService : IVersionUpdaterService
+public partial class VersionUpdaterService : IVersionUpdaterService
 {
     private readonly ILogger<VersionUpdaterService> _logger;
     private readonly IEventHub _eventHub;
@@ -58,6 +59,9 @@ public class VersionUpdaterService : IVersionUpdaterService
     private const string GithubLatestReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases/latest";
     private const string GithubAllReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases";
 #pragma warning restore S1075
+
+    [GeneratedRegex(@"^\n*(.*?)\n+#{1,2}\s", RegexOptions.Singleline)]
+    private static partial Regex BlogPartRegex();
 
     public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IEventHub eventHub)
     {
@@ -135,18 +139,30 @@ public class VersionUpdaterService : IVersionUpdaterService
         var updateVersion = new Version(update.Tag_Name.Replace("v", string.Empty));
         var currentVersion = BuildInfo.Version.ToString(4);
 
+        var bodyHtml = _markdown.Transform(update.Body.Trim());
+        var parsedSections = ParseReleaseBody(update.Body);
+        var blogPart = _markdown.Transform(ExtractBlogPart(update.Body).Trim());
 
         return new UpdateNotificationDto()
         {
             CurrentVersion = currentVersion,
             UpdateVersion = updateVersion.ToString(),
-            UpdateBody = _markdown.Transform(update.Body.Trim()),
+            UpdateBody = bodyHtml,
             UpdateTitle = update.Name,
             UpdateUrl = update.Html_Url,
             IsDocker = OsInfo.IsDocker,
             PublishDate = update.Published_At,
             IsReleaseEqual = IsVersionEqualToBuildVersion(updateVersion),
             IsReleaseNewer = BuildInfo.Version < updateVersion,
+
+            Added = parsedSections.TryGetValue("Added", out var added) ? added : [],
+            Removed = parsedSections.TryGetValue("Removed", out var removed) ? removed : [],
+            Changed = parsedSections.TryGetValue("Changed", out var changed) ? changed : [],
+            Fixed = parsedSections.TryGetValue("Fixed", out var fixes) ? fixes : [],
+            Theme = parsedSections.TryGetValue("Theme", out var theme) ? theme : [],
+            Developer = parsedSections.TryGetValue("Developer", out var developer) ? developer : [],
+            Api = parsedSections.TryGetValue("Api", out var api) ? api : [],
+            BlogPart = blogPart
         };
     }
 
@@ -185,4 +201,60 @@ public class VersionUpdaterService : IVersionUpdaterService
 
         return update;
     }
+
+    private static string ExtractBlogPart(string body)
+    {
+        var match = BlogPartRegex().Match(body);
+        return match.Success ? match.Groups[1].Value.Trim() : body.Trim();
+    }
+
+    private static Dictionary<string, List<string>> ParseReleaseBody(string body)
+    {
+        var sections = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        var lines = body.Split('\n');
+        string currentSection = null;
+
+        foreach (var line in lines)
+        {
+            var trimmedLine = line.Trim();
+
+            // Check for section headers (case-insensitive)
+            if (trimmedLine.StartsWith('#'))
+            {
+                currentSection = trimmedLine.TrimStart('#').Trim();
+                sections[currentSection] = [];
+                continue;
+            }
+
+            // Parse items under a section
+            if (currentSection != null &&
+                trimmedLine.StartsWith("- ") &&
+                !string.IsNullOrWhiteSpace(trimmedLine))
+            {
+                // Remove "Fixed:", "Added:" etc. if present
+                var cleanedItem = CleanSectionItem(trimmedLine);
+
+                // Only add non-empty items
+                if (!string.IsNullOrWhiteSpace(cleanedItem))
+                {
+                    sections[currentSection].Add(cleanedItem);
+                }
+            }
+        }
+
+        return sections;
+    }
+
+    private static string CleanSectionItem(string item)
+    {
+        // Remove everything up to and including the first ":"
+        var colonIndex = item.IndexOf(':');
+        if (colonIndex != -1)
+        {
+            item = item.Substring(colonIndex + 1).Trim();
+        }
+
+        return item;
+    }
+
 }

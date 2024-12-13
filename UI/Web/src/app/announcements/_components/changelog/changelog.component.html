@@ -8,30 +8,56 @@
       </p>
 
       @for(update of updates; track update; let indx = $index) {
-        <div class="card w-100 mb-2" style="width: 18rem;">
-          <div class="card-body">
-            <h4 class="card-title">{{update.updateTitle}}&nbsp;
-              @if (update.isOnNightlyInRelease) {
-                <span class="badge bg-secondary">{{t('nightly', {version: update.currentVersion})}}</span>
-              } @else if (update.isReleaseEqual) {
-                <span class="badge bg-secondary">{{t('installed')}}</span>
-              } @else if (update.isReleaseNewer && indx === 0) {
-                <span class="badge bg-secondary">{{t('available')}}</span>
-              }
-            </h4>
-            <h6 class="card-subtitle mb-1 mt-1 text-muted">{{t('published-label')}}{{update.publishDate | date: 'short'}}</h6>
 
+        <div ngbAccordion class="mb-2">
+          <div ngbAccordionItem="{{update.updateVersion}}" class="p-2">
+            <h2 ngbAccordionHeader>
+              <button ngbAccordionButton>
+                <h4>{{update.updateTitle}}&nbsp;
+                  @if (update.isOnNightlyInRelease) {
+                    <span class="badge bg-secondary">{{t('nightly', {version: update.currentVersion})}}</span>
+                  } @else if (update.isReleaseEqual) {
+                    <span class="badge bg-secondary">{{t('installed')}}</span>
+                  } @else if (update.isReleaseNewer && indx === 0) {
+                    <span class="badge bg-secondary">{{t('available')}}</span>
+                  }
+                </h4>
+              </button>
+            </h2>
+            <div ngbAccordionCollapse>
+              <div ngbAccordionBody>
+                <ng-template>
+                  <div class="update-details">
+                    <div class="blog-content" [innerHTML]="update.blogPart | safeHtml"></div>
 
-            <pre class="card-text update-body">
-              <app-read-more [text]="update.updateBody" [maxLength]="500"></app-read-more>
-            </pre>
-            @if (!update.isDocker && (accountService.isAdmin$ | async)) {
-              @if (update.updateVersion === update.currentVersion) {
-                <a href="{{update.updateUrl}}" class="btn disabled btn-{{indx === 0 ? 'primary' : 'secondary'}} float-end" target="_blank" rel="noopener noreferrer">{{t('installed')}}</a>
-              } @else {
-                <a href="{{update.updateUrl}}" class="btn btn-{{indx === 0 ? 'primary' : 'secondary'}} float-end" target="_blank" rel="noopener noreferrer">{{t('download')}}</a>
-              }
-            }
+                    <div class="setting-section-break"></div>
+
+                    <div class="mt-4">
+                      <app-update-section [items]="update.added" [title]="'Added'"></app-update-section>
+                      <app-update-section [items]="update.changed" [title]="'Changed'"></app-update-section>
+                      <app-update-section [items]="update.fixed" [title]="'Fixed'"></app-update-section>
+                      <app-update-section [items]="update.developer" [title]="'Developer'"></app-update-section>
+                      <app-update-section [items]="update.theme" [title]="'Theme'"></app-update-section>
+                      <app-update-section [items]="update.removed" [title]="'Removed'"></app-update-section>
+                      <app-update-section [items]="update.api" [title]="'API'"></app-update-section>
+                    </div>
+
+                    <div class="setting-section-break"></div>
+
+                    <div class="mb-1 mt-2">
+                      <span class="text-muted">{{t('published-label')}}{{update.publishDate | date: 'short'}}</span>
+                      @if (!update.isDocker && (accountService.isAdmin$ | async)) {
+                        @if (update.updateVersion === update.currentVersion) {
+                          <a href="{{update.updateUrl}}" class="btn disabled btn-{{indx === 0 ? 'primary' : 'secondary'}} float-end" target="_blank" rel="noopener noreferrer">{{t('installed')}}</a>
+                        } @else {
+                          <a href="{{update.updateUrl}}" class="btn btn-{{indx === 0 ? 'primary' : 'secondary'}} float-end" target="_blank" rel="noopener noreferrer">{{t('download')}}</a>
+                        }
+                      }
+                    </div>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
           </div>
         </div>
       }

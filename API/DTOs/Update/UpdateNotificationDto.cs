@@ -1,4 +1,7 @@
-﻿namespace API.DTOs.Update;
+﻿using System.Collections.Generic;
+using System.Runtime.InteropServices.JavaScript;
+
+namespace API.DTOs.Update;
 
 /// <summary>
 /// Update Notification denoting a new release available for user to update to
@@ -50,4 +53,16 @@ public class UpdateNotificationDto
     /// Is the server on this version
     /// </summary>
     public bool IsReleaseEqual { get; set; }
+
+    public IList<string> Added { get; set; }
+    public IList<string> Removed { get; set; }
+    public IList<string> Changed { get; set; }
+    public IList<string> Fixed { get; set; }
+    public IList<string> Theme { get; set; }
+    public IList<string> Developer { get; set; }
+    public IList<string> Api { get; set; }
+    /// <summary>
+    /// The part above the changelog part
+    /// </summary>
+    public string BlogPart { get; set; }
 }

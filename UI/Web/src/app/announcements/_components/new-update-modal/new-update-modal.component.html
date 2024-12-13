@@ -1,0 +1,28 @@
+<ng-container *transloco="let t; read:'new-version-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title'), {version: version})}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <div class="modal-body scrollable-modal">
+
+    @if (update) {
+      <p>{{update.blogPart | safeHtml}}</p>
+
+      <div class="mt-4">
+        <app-update-section [items]="update.added" [title]="'Added'"></app-update-section>
+        <app-update-section [items]="update.changed" [title]="'Changed'"></app-update-section>
+        <app-update-section [items]="update.fixed" [title]="'Fixed'"></app-update-section>
+        <app-update-section [items]="update.developer" [title]="'Developer'"></app-update-section>
+        <app-update-section [items]="update.theme" [title]="'Theme'"></app-update-section>
+        <app-update-section [items]="update.removed" [title]="'Removed'"></app-update-section>
+        <app-update-section [items]="update.api" [title]="'API'"></app-update-section>
+      </div>
+    }
+
+  </div>
+  <div class="modal-footer">
+    <a class="btn btn-link me-1" href="https://discord.gg/b52wT37kt7" target="_blank" rel="noreferrer noopener">Discord</a>
+    <button type="button" class="btn btn-primary" (click)="close()">{{t('close')}}</button>
+  </div>
+
+</ng-container>

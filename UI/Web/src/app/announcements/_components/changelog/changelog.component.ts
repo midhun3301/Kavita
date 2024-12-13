@@ -6,13 +6,22 @@ import {ReadMoreComponent} from '../../../shared/read-more/read-more.component';
 import {AsyncPipe, DatePipe} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../../_services/account.service";
+import {UpdateSectionComponent} from "../update-section/update-section.component";
+import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
+import {
+  NgbAccordionBody,
+  NgbAccordionButton, NgbAccordionCollapse,
+  NgbAccordionDirective,
+  NgbAccordionHeader,
+  NgbAccordionItem
+} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-changelog',
   templateUrl: './changelog.component.html',
   styleUrls: ['./changelog.component.scss'],
   standalone: true,
-  imports: [ReadMoreComponent, LoadingComponent, DatePipe, TranslocoDirective, AsyncPipe],
+  imports: [ReadMoreComponent, LoadingComponent, DatePipe, TranslocoDirective, AsyncPipe, UpdateSectionComponent, SafeHtmlPipe, NgbAccordionDirective, NgbAccordionItem, NgbAccordionButton, NgbAccordionHeader, NgbAccordionCollapse, NgbAccordionBody],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChangelogComponent implements OnInit {
