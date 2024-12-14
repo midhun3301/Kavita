@@ -10,10 +10,10 @@
       @for(update of updates; track update; let indx = $index) {
 
         <div ngbAccordion class="mb-2">
-          <div ngbAccordionItem="{{update.updateVersion}}" class="p-2">
+          <div ngbAccordionItem class="p-2">
             <h2 ngbAccordionHeader>
               <button ngbAccordionButton>
-                <h4>{{update.updateTitle}}&nbsp;
+                <h4 class="changelog-header">{{update.updateTitle}}&nbsp;
                   @if (update.isOnNightlyInRelease) {
                     <span class="badge bg-secondary">{{t('nightly', {version: update.currentVersion})}}</span>
                   } @else if (update.isReleaseEqual) {
