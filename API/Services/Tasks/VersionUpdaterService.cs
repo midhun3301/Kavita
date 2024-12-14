@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -54,6 +55,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 {
     private readonly ILogger<VersionUpdaterService> _logger;
     private readonly IEventHub _eventHub;
+    private readonly IDirectoryService _directoryService;
     private readonly Markdown _markdown = new MarkdownDeep.Markdown();
 #pragma warning disable S1075
     private const string GithubLatestReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases/latest";
@@ -62,11 +64,16 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 
     [GeneratedRegex(@"^\n*(.*?)\n+#{1,2}\s", RegexOptions.Singleline)]
     private static partial Regex BlogPartRegex();
+    private static string _cacheFilePath;
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
 
-    public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IEventHub eventHub)
+    public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IEventHub eventHub, IDirectoryService directoryService)
     {
         _logger = logger;
         _eventHub = eventHub;
+        _directoryService = directoryService;
+
+        _cacheFilePath = Path.Combine(directoryService.LongTermCacheDirectory, "github_releases_cache.json");
 
         FlurlHttp.ConfigureClient(GithubLatestReleasesUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
@@ -198,12 +205,30 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         return update;
     }
 
-    private static async Task<IEnumerable<GithubReleaseMetadata>> GetGithubReleases()
+    private static async Task<IList<GithubReleaseMetadata>> GetGithubReleases()
     {
+        // Check if cached data is available and valid
+        if (File.Exists(_cacheFilePath))
+        {
+            var fileInfo = new FileInfo(_cacheFilePath);
+            if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= CacheDuration)
+            {
+                // Read from cache
+                var cachedData = await File.ReadAllTextAsync(_cacheFilePath);
+                return System.Text.Json.JsonSerializer.Deserialize<IList<GithubReleaseMetadata>>(cachedData)
+                       ?? [];
+            }
+        }
+
+
         var update = await GithubAllReleasesUrl
             .WithHeader("Accept", "application/json")
             .WithHeader("User-Agent", "Kavita")
-            .GetJsonAsync<IEnumerable<GithubReleaseMetadata>>();
+            .GetJsonAsync<IList<GithubReleaseMetadata>>();
+
+        // Cache the data to disk
+        var json = System.Text.Json.JsonSerializer.Serialize(update, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        await File.WriteAllTextAsync(_cacheFilePath, json);
 
         return update;
     }

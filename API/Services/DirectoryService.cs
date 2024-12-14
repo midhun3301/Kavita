@@ -31,6 +31,10 @@ public interface IDirectoryService
     string TemplateDirectory { get; }
     string PublisherDirectory { get; }
     /// <summary>
+    /// Used for caching documents that may need to stay on disk for more than a day
+    /// </summary>
+    string LongTermCacheDirectory { get; }
+    /// <summary>
     /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettingKey.BackupDirectory"/> for actual path.
     /// </summary>
     string BookmarkDirectory { get; }
@@ -89,6 +93,7 @@ public class DirectoryService : IDirectoryService
     public string CustomizedTemplateDirectory { get; }
     public string TemplateDirectory { get; }
     public string PublisherDirectory { get; }
+    public string LongTermCacheDirectory { get; }
     private readonly ILogger<DirectoryService> _logger;
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
@@ -126,6 +131,8 @@ public class DirectoryService : IDirectoryService
         ExistOrCreate(TemplateDirectory);
         PublisherDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "images", "publishers");
         ExistOrCreate(PublisherDirectory);
+        LongTermCacheDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "cache-long");
+        ExistOrCreate(LongTermCacheDirectory);
     }
 
     /// <summary>
