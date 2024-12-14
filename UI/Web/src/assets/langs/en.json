@@ -623,10 +623,13 @@
         "installed": "Installed",
         "download": "Download",
         "nightly": "Nightly: {{version}}",
-        "published-label": "Published: ",
         "available": "Available",
         "description": "If you do not see an {{installed}}",
-        "description-continued": "tag, you are on a nightly release. Only major versions will show as available. A nightly tag will show when on a nightly from that stable.",
+        "description-continued": "tag, you are on a nightly release. Only major versions will show as available. A nightly tag will show when on a nightly from that stable."
+    },
+
+    "changelog-update-item": {
+        "download": "Download",
         "added": "Added",
         "changed": "Changed",
         "fixed": "Fixed",
@@ -634,6 +637,21 @@
         "theme": "Theme",
         "removed": "Removed",
         "api": "API",
+        "published-label": "Published: "
+    },
+
+    "new-version-modal": {
+        "title": "Kavita was updated!",
+        "description": "A new version of Kavita is available. Refresh to update.",
+        "added": "{{changelog.added}}",
+        "changed": "{{changelog.changed}}",
+        "fixed": "{{changelog.fixed}}",
+        "developer": "{{changelog.developer}}",
+        "theme": "{{changelog.theme}}",
+        "removed": "{{changelog.removed}}",
+        "api": "{{changelog.api}}",
+        "close": "{{common.close}}",
+        "refresh": "Refresh"
     },
 
     "invite-user": {
