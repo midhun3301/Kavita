@@ -637,7 +637,8 @@
         "theme": "Theme",
         "removed": "Removed",
         "api": "API",
-        "published-label": "Published: "
+        "published-label": "Published: ",
+        "installed": "{{changelog.installed}}"
     },
 
     "new-version-modal": {

@@ -192,6 +192,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="config\cache-long\" />
     <Folder Include="config\themes" />
     <Content Include="EmailTemplates\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

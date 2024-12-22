@@ -120,7 +120,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                     CurrentVersion = dto.CurrentVersion,
                     UpdateUrl = prInfo.Html_Url,
                     PublishDate = prInfo.Merged_At,
-                    IsDocker = dto.IsDocker,
+                    IsDocker = true, // Nightlies are always Docker Only
                     IsReleaseEqual = IsVersionEqualToBuildVersion(Version.Parse(nightly.Version)),
                     IsReleaseNewer = true, // Since we already filtered these in GetNightlyReleases
                     Added = sections.TryGetValue("Added", out var added) ? added : [],
@@ -137,11 +137,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                 nightlyDtos.Add(nightlyDto);
             }
 
-            // Get the parent list that contains our DTO
-
-
             // Insert nightly releases at the beginning of the list
-            //var index = dtos.IndexOf(dto);
             var sortedNightlyDtos = nightlyDtos.OrderByDescending(x => x.PublishDate).ToList();
             dtos.InsertRange(0, sortedNightlyDtos);
         }
@@ -369,8 +365,8 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 
     private static bool IsVersionEqualToBuildVersion(Version updateVersion)
     {
-        return updateVersion.Revision < 0 && BuildInfo.Version.Revision == 0 &&
-               CompareWithoutRevision(BuildInfo.Version, updateVersion);
+        return updateVersion == BuildInfo.Version || (updateVersion.Revision < 0 && BuildInfo.Version.Revision == 0 &&
+                                                      CompareWithoutRevision(BuildInfo.Version, updateVersion));
     }
 
     private static bool CompareWithoutRevision(Version v1, Version v2)

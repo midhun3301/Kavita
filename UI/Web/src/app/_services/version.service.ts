@@ -83,11 +83,11 @@ export class VersionService implements OnDestroy{
         ref.closed.subscribe(_ => this.onModalClosed());
         ref.dismissed.subscribe(_ => this.onModalClosed());
 
-      })
+      });
 
-    } else {
-      localStorage.setItem(VersionService.versionKey, version);
     }
+
+    localStorage.setItem(VersionService.versionKey, version);
   }
 
   private onModalClosed() {
