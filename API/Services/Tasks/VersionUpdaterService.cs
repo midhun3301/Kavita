@@ -56,15 +56,12 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 {
     private readonly ILogger<VersionUpdaterService> _logger;
     private readonly IEventHub _eventHub;
-    private readonly IDirectoryService _directoryService;
     private readonly Markdown _markdown = new MarkdownDeep.Markdown();
 #pragma warning disable S1075
     private const string GithubLatestReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases/latest";
     private const string GithubAllReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases";
     private const string GithubPullsUrl = "https://api.github.com/repos/Kareadita/Kavita/pulls/";
     private const string GithubBranchCommitsUrl = "https://api.github.com/repos/Kareadita/Kavita/commits?sha=develop";
-    private const string GithubContentsUrl = "https://api.github.com/repos/Kareadita/Kavita/contents/API/AssemblyInfo.cs?ref=";
-
 #pragma warning restore S1075
 
     [GeneratedRegex(@"^\n*(.*?)\n+#{1,2}\s", RegexOptions.Singleline)]
@@ -76,8 +73,6 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     {
         _logger = logger;
         _eventHub = eventHub;
-        _directoryService = directoryService;
-
         _cacheFilePath = Path.Combine(directoryService.LongTermCacheDirectory, "github_releases_cache.json");
 
         FlurlHttp.ConfigureClient(GithubLatestReleasesUrl, cli =>
@@ -155,6 +150,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
             _logger.LogError(ex, "Failed to enrich nightly release information");
         }
     }
+
 
     private async Task<PullRequestInfo?> FetchPullRequestInfo(int prNumber)
     {
@@ -292,6 +288,13 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 
     public async Task<IList<UpdateNotificationDto>> GetAllReleases(int count = 0)
     {
+        // Attempt to fetch from cache
+        var cachedReleases = await TryGetCachedReleases();
+        if (cachedReleases != null)
+        {
+            return cachedReleases;
+        }
+
         var updates = await GetGithubReleases();
         var query = updates.Select(CreateDto)
             .Where(d => d != null)
@@ -325,8 +328,44 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 
         latestRelease.IsOnNightlyInRelease = isNightly;
 
+        // Cache the fetched data
+        if (updateDtos.Count > 0)
+        {
+            await CacheReleasesAsync(updateDtos);
+        }
+
         return updateDtos;
     }
+
+    private async Task<IList<UpdateNotificationDto>?> TryGetCachedReleases()
+    {
+        if (File.Exists(_cacheFilePath))
+        {
+            var fileInfo = new FileInfo(_cacheFilePath);
+            if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= CacheDuration)
+            {
+                var cachedData = await File.ReadAllTextAsync(_cacheFilePath);
+                return System.Text.Json.JsonSerializer.Deserialize<IList<UpdateNotificationDto>>(cachedData);
+            }
+        }
+
+        return null;
+    }
+
+    private async Task CacheReleasesAsync(IList<UpdateNotificationDto> updates)
+    {
+        try
+        {
+            var json = System.Text.Json.JsonSerializer.Serialize(updates, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync(_cacheFilePath, json);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to cache releases");
+        }
+    }
+
+
 
     private static bool IsVersionEqualToBuildVersion(Version updateVersion)
     {
@@ -432,28 +471,10 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 
     private static async Task<IList<GithubReleaseMetadata>> GetGithubReleases()
     {
-        // Check if cached data is available and valid
-        if (File.Exists(_cacheFilePath))
-        {
-            var fileInfo = new FileInfo(_cacheFilePath);
-            if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= CacheDuration)
-            {
-                // Read from cache
-                var cachedData = await File.ReadAllTextAsync(_cacheFilePath);
-                return System.Text.Json.JsonSerializer.Deserialize<IList<GithubReleaseMetadata>>(cachedData)
-                       ?? [];
-            }
-        }
-
-
         var update = await GithubAllReleasesUrl
             .WithHeader("Accept", "application/json")
             .WithHeader("User-Agent", "Kavita")
             .GetJsonAsync<IList<GithubReleaseMetadata>>();
-
-        // Cache the data to disk
-        var json = System.Text.Json.JsonSerializer.Serialize(update, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
-        await File.WriteAllTextAsync(_cacheFilePath, json);
 
         return update;
     }
@@ -514,7 +535,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         return item;
     }
 
-    private class PullRequestInfo
+    sealed class PullRequestInfo
     {
         public required string Title { get; init; }
         public required string Body { get; init; }
@@ -523,25 +544,25 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         public required int Number { get; init; }
     }
 
-    private class CommitInfo
+    sealed class CommitInfo
     {
         public required string Sha { get; init; }
         public required CommitDetail Commit { get; init; }
         public required string Html_Url { get; init; }
     }
 
-    private class CommitDetail
+    sealed class CommitDetail
     {
         public required string Message { get; init; }
         public required CommitAuthor Author { get; init; }
     }
 
-    private class CommitAuthor
+    sealed class CommitAuthor
     {
         public required string Date { get; init; }
     }
 
-    private class NightlyInfo
+    sealed class NightlyInfo
     {
         public required string Version { get; init; }
         public required int PrNumber { get; init; }
