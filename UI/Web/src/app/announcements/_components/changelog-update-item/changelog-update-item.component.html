@@ -1,9 +1,11 @@
 <ng-container *transloco="let t; read:'changelog-update-item'">
   @if (update) {
     <div class="update-details">
-      <div class="blog-content" [innerHTML]="update.blogPart | safeHtml"></div>
+      @if (update.blogPart) {
+        <div class="blog-content" [innerHTML]="update.blogPart | safeHtml"></div>
 
-      <div class="setting-section-break"></div>
+        <div class="setting-section-break"></div>
+      }
 
       <div class="mt-4">
         <app-update-section [items]="update.added" [title]="t('added')"></app-update-section>
