@@ -32,7 +32,7 @@ internal class GithubReleaseMetadata
     /// </summary>
     public required string Body { get; init; }
     /// <summary>
-    /// Url of the release on Github
+    /// Url of the release on GitHub
     /// </summary>
     // ReSharper disable once InconsistentNaming
     public required string Html_Url { get; init; }
@@ -51,6 +51,7 @@ public interface IVersionUpdaterService
     Task<int> GetNumberOfReleasesBehind();
 }
 
+
 public partial class VersionUpdaterService : IVersionUpdaterService
 {
     private readonly ILogger<VersionUpdaterService> _logger;
@@ -60,6 +61,10 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 #pragma warning disable S1075
     private const string GithubLatestReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases/latest";
     private const string GithubAllReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases";
+    private const string GithubPullsUrl = "https://api.github.com/repos/Kareadita/Kavita/pulls/";
+    private const string GithubBranchCommitsUrl = "https://api.github.com/repos/Kareadita/Kavita/commits?sha=develop";
+    private const string GithubContentsUrl = "https://api.github.com/repos/Kareadita/Kavita/contents/API/AssemblyInfo.cs?ref=";
+
 #pragma warning restore S1075
 
     [GeneratedRegex(@"^\n*(.*?)\n+#{1,2}\s", RegexOptions.Singleline)]
@@ -82,14 +87,208 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     }
 
     /// <summary>
-    /// Fetches the latest release from Github
+    /// Fetches the latest (stable) release from GitHub. Does not do any extra nightly release parsing.
     /// </summary>
     /// <returns>Latest update</returns>
     public async Task<UpdateNotificationDto?> CheckForUpdate()
     {
         var update = await GetGithubRelease();
-        return CreateDto(update);
+        var dto = CreateDto(update);
+
+        return dto;
     }
+
+    private async Task EnrichWithNightlyInfo(List<UpdateNotificationDto> dtos)
+    {
+        var dto = dtos[0]; // Latest version
+        try
+        {
+            var currentVersion = new Version(dto.CurrentVersion);
+            var nightlyReleases = await GetNightlyReleases(currentVersion, Version.Parse(dto.UpdateVersion));
+
+            if (nightlyReleases.Count == 0) return;
+
+            // Create new DTOs for each nightly release and insert them at the beginning of the list
+            var nightlyDtos = new List<UpdateNotificationDto>();
+            foreach (var nightly in nightlyReleases)
+            {
+                var prInfo = await FetchPullRequestInfo(nightly.PrNumber);
+                if (prInfo == null) continue;
+
+                var sections = ParseReleaseBody(prInfo.Body);
+                var blogPart = ExtractBlogPart(prInfo.Body);
+
+                var nightlyDto = new UpdateNotificationDto
+                {
+                    UpdateTitle = $"Nightly Release {nightly.Version} - {prInfo.Title}",
+                    UpdateVersion = nightly.Version,
+                    CurrentVersion = dto.CurrentVersion,
+                    UpdateUrl = prInfo.Html_Url,
+                    PublishDate = prInfo.Merged_At,
+                    IsDocker = dto.IsDocker,
+                    IsReleaseEqual = IsVersionEqualToBuildVersion(Version.Parse(nightly.Version)),
+                    IsReleaseNewer = true, // Since we already filtered these in GetNightlyReleases
+                    Added = sections.TryGetValue("Added", out var added) ? added : [],
+                    Changed = sections.TryGetValue("Changed", out var changed) ? changed : [],
+                    Fixed = sections.TryGetValue("Fixed", out var bugfixes) ? bugfixes : [],
+                    Removed = sections.TryGetValue("Removed", out var removed) ? removed : [],
+                    Theme = sections.TryGetValue("Theme", out var theme) ? theme : [],
+                    Developer = sections.TryGetValue("Developer", out var developer) ? developer : [],
+                    Api = sections.TryGetValue("Api", out var api) ? api : [],
+                    BlogPart = _markdown.Transform(blogPart.Trim()),
+                    UpdateBody = _markdown.Transform(prInfo.Body.Trim())
+                };
+
+                nightlyDtos.Add(nightlyDto);
+            }
+
+            // Get the parent list that contains our DTO
+
+
+            // Insert nightly releases at the beginning of the list
+            //var index = dtos.IndexOf(dto);
+            var sortedNightlyDtos = nightlyDtos.OrderByDescending(x => x.PublishDate).ToList();
+            dtos.InsertRange(0, sortedNightlyDtos);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to enrich nightly release information");
+        }
+    }
+
+    private async Task<PullRequestInfo?> FetchPullRequestInfo(int prNumber)
+    {
+        try
+        {
+            return await $"{GithubPullsUrl}{prNumber}"
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .GetJsonAsync<PullRequestInfo>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to fetch PR information for #{PrNumber}", prNumber);
+            return null;
+        }
+    }
+
+    private async Task<List<NightlyInfo>> GetNightlyReleases(Version currentVersion, Version latestStableVersion)
+    {
+        try
+        {
+            var nightlyReleases = new List<NightlyInfo>();
+
+            var commits = await GithubBranchCommitsUrl
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .GetJsonAsync<IList<CommitInfo>>();
+
+            var commitList = commits.ToList();
+            bool foundLastStable = false;
+
+            for (var i = 0; i < commitList.Count - 1; i++)
+            {
+                var commit = commitList[i];
+                var message = commit.Commit.Message.Split('\n')[0]; // Take first line only
+
+                // Skip [skip ci] commits
+                if (message.Contains("[skip ci]")) continue;
+
+                // Check if this is a stable release
+                if (message.StartsWith('v'))
+                {
+                    var stableMatch = Regex.Match(message, @"v(\d+\.\d+\.\d+\.\d+)");
+                    if (stableMatch.Success)
+                    {
+                        var stableVersion = new Version(stableMatch.Groups[1].Value);
+                        // If we find a stable version lower than current, we've gone too far back
+                        if (stableVersion <= currentVersion)
+                        {
+                            foundLastStable = true;
+                            break;
+                        }
+                    }
+                    continue;
+                }
+
+                // Look for version bumps that follow PRs
+                if (!foundLastStable && message == "Bump versions by dotnet-bump-version.")
+                {
+                    // Get the PR commit that triggered this version bump
+                    if (i + 1 < commitList.Count)
+                    {
+                        var prCommit = commitList[i + 1];
+                        var prMessage = prCommit.Commit.Message.Split('\n')[0];
+
+                        // Extract PR number using improved regex
+                        var prMatch = Regex.Match(prMessage, @"(?:^|\s)\(#(\d+)\)|\s#(\d+)");
+                        if (!prMatch.Success) continue;
+
+                        var prNumber = int.Parse(prMatch.Groups[1].Value != "" ?
+                            prMatch.Groups[1].Value : prMatch.Groups[2].Value);
+
+                        // Get the version from AssemblyInfo.cs in this commit
+                        var version = await GetVersionFromCommit(commit.Sha);
+                        if (version == null) continue;
+
+                        // Parse version and compare with current version
+                        if (Version.TryParse(version, out var parsedVersion) &&
+                            parsedVersion > latestStableVersion)
+                        {
+                            nightlyReleases.Add(new NightlyInfo
+                            {
+                                Version = version,
+                                PrNumber = prNumber,
+                                Date = DateTime.Parse(commit.Commit.Author.Date)
+                            });
+                        }
+                    }
+                }
+            }
+
+            return nightlyReleases.OrderByDescending(x => x.Date).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get nightly releases");
+            return [];
+        }
+    }
+
+    private async Task<int?> ExtractPRNumber(string version)
+    {
+        try
+        {
+            // Fetch recent commits from develop branch
+            var commits = await GithubBranchCommitsUrl
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .GetJsonAsync<IList<CommitInfo>>();
+
+            // Look for commit with version bump
+            var versionCommit = commits.FirstOrDefault(c =>
+                c.Commit.Message.Contains("Bump versions by dotnet-bump-version") ||
+                c.Commit.Message.Contains($"v{version}"));
+
+            if (versionCommit == null) return null;
+
+            // Find the merge commit just before the version bump
+            var mergeCommitIndex = commits.ToList().FindIndex(c => c.Sha == versionCommit.Sha) + 1;
+            if (mergeCommitIndex >= commits.Count) return null;
+
+            var mergeCommit = commits[mergeCommitIndex];
+
+            // PR merge commits have format "Merge pull request #1234 from ..."
+            var match = Regex.Match(mergeCommit.Commit.Message, @".+\s\(#(\d+)\)$");
+            return match.Success ? int.Parse(match.Groups[1].Value) : null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to extract PR number for version {Version}", version);
+            return null;
+        }
+    }
+
 
     public async Task<IList<UpdateNotificationDto>> GetAllReleases(int count = 0)
     {
@@ -105,6 +304,12 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         }
 
         var updateDtos = query.ToList();
+
+        // If we're on a nightly build, enrich the information
+        if (updateDtos.Count != 0 && BuildInfo.Version > new Version(updateDtos[0].UpdateVersion))
+        {
+            await EnrichWithNightlyInfo(updateDtos);
+        }
 
         // Find the latest dto
         var latestRelease = updateDtos[0]!;
@@ -194,6 +399,26 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         }
     }
 
+    private async Task<string?> GetVersionFromCommit(string commitSha)
+    {
+        try
+        {
+            // Use the raw GitHub URL format for the csproj file
+            var content = await $"https://raw.githubusercontent.com/Kareadita/Kavita/{commitSha}/Kavita.Common/Kavita.Common.csproj"
+                .WithHeader("User-Agent", "Kavita")
+                .GetStringAsync();
+
+            var versionMatch = Regex.Match(content, @"<AssemblyVersion>([0-9\.]+)</AssemblyVersion>");
+            return versionMatch.Success ? versionMatch.Groups[1].Value : null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get version from commit {Sha}: {Message}", commitSha, ex.Message);
+            return null;
+        }
+    }
+
+
 
     private static async Task<GithubReleaseMetadata> GetGithubRelease()
     {
@@ -235,6 +460,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 
     private static string ExtractBlogPart(string body)
     {
+        if (body.StartsWith('#')) return string.Empty;
         var match = BlogPartRegex().Match(body);
         return match.Success ? match.Groups[1].Value.Trim() : body.Trim();
     }
@@ -288,4 +514,37 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         return item;
     }
 
+    private class PullRequestInfo
+    {
+        public required string Title { get; init; }
+        public required string Body { get; init; }
+        public required string Html_Url { get; init; }
+        public required string Merged_At { get; init; }
+        public required int Number { get; init; }
+    }
+
+    private class CommitInfo
+    {
+        public required string Sha { get; init; }
+        public required CommitDetail Commit { get; init; }
+        public required string Html_Url { get; init; }
+    }
+
+    private class CommitDetail
+    {
+        public required string Message { get; init; }
+        public required CommitAuthor Author { get; init; }
+    }
+
+    private class CommitAuthor
+    {
+        public required string Date { get; init; }
+    }
+
+    private class NightlyInfo
+    {
+        public required string Version { get; init; }
+        public required int PrNumber { get; init; }
+        public required DateTime Date { get; init; }
+    }
 }

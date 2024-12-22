@@ -24,11 +24,11 @@ public class UpdateNotificationDto
     /// <summary>
     /// Title of the release
     /// </summary>
-    public required string UpdateTitle { get; init; }
+    public required string UpdateTitle { get; set; }
     /// <summary>
     /// Github Url
     /// </summary>
-    public required string UpdateUrl { get; init; }
+    public required string UpdateUrl { get; set; }
     /// <summary>
     /// If this install is within Docker
     /// </summary>
@@ -40,7 +40,8 @@ public class UpdateNotificationDto
     /// <summary>
     /// Date of the publish
     /// </summary>
-    public required string PublishDate { get; init; }
+    public required string PublishDate { get; set
+        ; }
     /// <summary>
     /// Is the server on a nightly within this release
     /// </summary>
